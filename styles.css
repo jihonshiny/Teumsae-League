@@ -52,9 +52,9 @@ input {
   display: grid;
   grid-template-columns: 1fr;
   align-items: center;
-  gap: 22px;
-  margin-bottom: 20px;
-  padding: 22px 24px 20px;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 16px 24px 18px;
   border: 1px solid rgba(184, 205, 232, 0.72);
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.80);
@@ -72,6 +72,7 @@ input {
 .title-input {
   width: 100%;
   max-width: 1180px;
+  min-height: 88px;
   justify-self: center;
   border: 0;
   outline: 0;
@@ -79,7 +80,8 @@ input {
   color: var(--navy);
   text-align: center;
   font-family: "Malgun Gothic", "Apple SD Gothic Neo", Arial, sans-serif;
-  font-size: clamp(36px, 5vw, 72px);
+  font-size: clamp(54px, 6.4vw, 92px) !important;
+  line-height: 1.05;
   font-weight: 900;
   letter-spacing: 0;
   text-shadow: none;
@@ -531,7 +533,7 @@ input {
   }
 
   .topbar {
-    min-height: 150px;
+    min-height: auto;
   }
 
   .league-board {
