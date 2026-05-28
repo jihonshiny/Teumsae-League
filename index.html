@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>틈새리그 배드민턴 리그 대진표</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div class="title-wrap">
+          <p class="eyebrow">TEUMSAE LEAGUE · BADMINTON</p>
+          <input
+            id="titleInput"
+            class="title-input"
+            placeholder="대회 제목 입력"
+            aria-label="대회 제목"
+          />
+          <p class="subtitle">실시간 경기 운영 시스템</p>
+        </div>
+        <div class="actions">
+          <label class="court-control">
+            <span>코트 수</span>
+            <input id="courtCountInput" type="number" min="2" max="30" value="6" />
+          </label>
+          <button id="addMatchBtn" type="button">+ 경기</button>
+          <button id="removeMatchBtn" type="button">- 경기</button>
+          <button id="clearScoresBtn" type="button">점수 비우기</button>
+          <button id="printBtn" type="button">인쇄/PDF</button>
+          <button id="resetBtn" type="button">초기화</button>
+        </div>
+      </header>
+
+      <section class="league-board" aria-label="배드민턴 리그 대진표">
+        <div class="section-title">
+          <span>대진표</span>
+          <small>복식 3세트 경기 기록</small>
+        </div>
+        <div class="board-head">
+          <div class="head-cell side-head">구분</div>
+          <input
+            class="head-cell court-name"
+            data-court="0"
+            value="1~3 코트"
+            aria-label="왼쪽 코트 이름"
+          />
+          <input
+            class="head-cell court-name"
+            data-court="1"
+            value="4~6 코트"
+            aria-label="오른쪽 코트 이름"
+          />
+        </div>
+        <div id="matchList"></div>
+      </section>
+
+    <section class="result-section" aria-label="경기 결과">
+        <h2><span></span>경기결과<span></span></h2>
+        <table class="result-table">
+        <thead>
+          <tr>
+            <th>순위</th>
+            <th>학교명</th>
+            <th>결과</th>
+          </tr>
+          </thead>
+          <tbody id="resultBody"></tbody>
+        </table>
+      </section>
+    </main>
+
+    <template id="matchTemplate">
+      <section class="match">
+        <div class="match-title"></div>
+        <div class="fixture" data-fixture="0"></div>
+        <div class="fixture" data-fixture="1"></div>
+      </section>
+    </template>
+
+    <template id="fixtureTemplate">
+      <div class="fixture">
+        <div class="fixture-teams">
+          <label class="team-slot">
+            <input
+              class="school school-a"
+              data-field="schoolA"
+              placeholder="학교명"
+            />
+            <span class="record record-a">( )</span>
+          </label>
+          <strong>vs</strong>
+          <label class="team-slot">
+            <input
+              class="school school-b"
+              data-field="schoolB"
+              placeholder="학교명"
+            />
+            <span class="record record-b">( )</span>
+          </label>
+        </div>
+        <div class="set-list"></div>
+      </div>
+    </template>
+
+    <template id="setTemplate">
+      <div class="set-row">
+        <div class="set-number"></div>
+        <input
+          class="players"
+          data-field="playersA"
+          placeholder="선수명, 선수명"
+        />
+        <div class="scores">
+          <input
+            class="score score-a"
+            data-field="scoreA"
+            type="number"
+            min="0"
+            inputmode="numeric"
+          />
+          <span>:</span>
+          <input
+            class="score score-b"
+            data-field="scoreB"
+            type="number"
+            min="0"
+            inputmode="numeric"
+          />
+        </div>
+        <input
+          class="players"
+          data-field="playersB"
+          placeholder="선수명, 선수명"
+        />
+      </div>
+    </template>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
