@@ -109,6 +109,35 @@ textarea {
   z-index: 2;
 }
 
+.mode-toggle {
+  display: inline-flex;
+  gap: 4px;
+  height: 38px;
+  padding: 3px;
+  border: 1px solid rgba(6, 39, 95, 0.26);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.90);
+}
+
+.mode-toggle .mode-btn {
+  min-width: 82px;
+  height: 30px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.mode-toggle .mode-btn.is-active {
+  background: #06275f;
+  color: #ffffff;
+}
+
+.mode-toggle .mode-btn.is-active:hover {
+  background: #06275f;
+  color: #ffffff;
+}
+
 .actions button {
   min-width: 104px;
   height: 38px;
@@ -440,7 +469,7 @@ textarea {
 }
 
 .set-btn {
-  min-width: 92px;
+  min-width: 112px;
   height: 28px;
   border: 1px solid rgba(6, 39, 95, 0.24);
   border-radius: 999px;
@@ -454,6 +483,24 @@ textarea {
 
 .set-btn:hover {
   background: #eef5ff;
+}
+
+.mode-individual .player-cell {
+  display: none;
+}
+
+.mode-individual .set-row {
+  grid-template-columns: 50px minmax(180px, 1fr);
+}
+
+.mode-individual .scores {
+  border-right: 0;
+}
+
+.mode-individual .set-list {
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .scores {

@@ -4,6 +4,9 @@ const titleInput = document.querySelector("#titleInput");
 const courtCountInput = document.querySelector("#courtCountInput");
 const matchList = document.querySelector("#matchList");
 const resultBody = document.querySelector("#resultBody");
+const nameColumnHead = document.querySelector("#nameColumnHead");
+const sectionCaption = document.querySelector(".section-title small");
+const modeButtons = document.querySelectorAll(".mode-btn");
 const addMatchBtn = document.querySelector("#addMatchBtn");
 const removeMatchBtn = document.querySelector("#removeMatchBtn");
 const clearScoresBtn = document.querySelector("#clearScoresBtn");
@@ -30,6 +33,7 @@ function loadState() {
 
   return {
     title: "",
+    mode: "team",
     courtCount: 6,
     courts: getCourtLabels(6),
     matches: [createMatch(0)],
@@ -42,6 +46,7 @@ function saveState() {
 
 function sanitizeState(nextState) {
   nextState.title = String(nextState.title ?? "");
+  nextState.mode = nextState.mode === "individual" ? "individual" : "team";
   nextState.courtCount = normalizeCourtCount(nextState.courtCount ?? 6);
   nextState.courts = normalizeCourts(nextState.courts, nextState.courtCount);
   nextState.matches.forEach((match) => {
@@ -85,6 +90,7 @@ function renderBoard() {
   ensureAllFixtureCounts();
   titleInput.value = state.title;
   courtCountInput.value = state.courtCount;
+  renderMode();
   renderCourtHeader();
 
   matchList.replaceChildren();
@@ -120,6 +126,21 @@ function renderCourtHeader() {
   });
 }
 
+function renderMode() {
+  document.body.classList.toggle("mode-individual", state.mode === "individual");
+  document.body.classList.toggle("mode-team", state.mode !== "individual");
+
+  modeButtons.forEach((button) => {
+    const active = button.dataset.mode === state.mode;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+
+  const label = getCompetitorLabel();
+  nameColumnHead.textContent = label;
+  sectionCaption.textContent = state.mode === "individual" ? "개인전 세트 경기 기록" : "단체전 복식 경기 기록";
+}
+
 function renderFixture(fixture, matchIndex, fixtureIndex) {
   const fixtureEl = fixtureTemplate.content.firstElementChild.cloneNode(true);
   fixtureEl.className = `fixture fixture-${fixtureIndex + 1}`;
@@ -128,7 +149,10 @@ function renderFixture(fixture, matchIndex, fixtureIndex) {
 
   fixtureEl.querySelectorAll("[data-field]").forEach((input) => {
     const field = input.dataset.field;
-    if (field === "schoolA" || field === "schoolB") input.value = fixture[field];
+    if (field === "schoolA" || field === "schoolB") {
+      input.value = fixture[field];
+      input.placeholder = getCompetitorLabel();
+    }
   });
 
   const setList = fixtureEl.querySelector(".set-list");
@@ -147,8 +171,8 @@ function renderFixture(fixture, matchIndex, fixtureIndex) {
   const controls = document.createElement("div");
   controls.className = "set-controls";
   controls.innerHTML = `
-    <button class="set-btn" type="button" data-action="add-set" data-match="${matchIndex}" data-fixture="${fixtureIndex}">+ 출전 줄</button>
-    <button class="set-btn" type="button" data-action="remove-set" data-match="${matchIndex}" data-fixture="${fixtureIndex}">- 마지막 줄</button>
+    <button class="set-btn" type="button" data-action="add-set" data-match="${matchIndex}" data-fixture="${fixtureIndex}">${getAddSetLabel()}</button>
+    <button class="set-btn" type="button" data-action="remove-set" data-match="${matchIndex}" data-fixture="${fixtureIndex}">${getRemoveSetLabel()}</button>
   `;
   fixtureEl.appendChild(controls);
 
@@ -167,6 +191,18 @@ function renderPlayerCell(cell, players, field, matchIndex, fixtureIndex, setInd
   list.appendChild(input);
 
   cell.replaceChildren(list);
+}
+
+function getCompetitorLabel() {
+  return state.mode === "individual" ? "선수명" : "학교명";
+}
+
+function getAddSetLabel() {
+  return state.mode === "individual" ? "+ 세트" : "+ 출전 줄";
+}
+
+function getRemoveSetLabel() {
+  return state.mode === "individual" ? "- 마지막 세트" : "- 마지막 줄";
 }
 
 function updateStateFromInput(input) {
@@ -334,7 +370,7 @@ function renderStandings(standings) {
 
   if (!rows.length) {
     const empty = document.createElement("tr");
-    empty.innerHTML = '<td colspan="4" class="empty">학교명과 점수를 입력하면 결과가 자동으로 표시됩니다.</td>';
+    empty.innerHTML = `<td colspan="4" class="empty">${getCompetitorLabel()}과 점수를 입력하면 결과가 자동으로 표시됩니다.</td>`;
     resultBody.appendChild(empty);
     return;
   }
@@ -390,6 +426,14 @@ document.addEventListener("input", (event) => {
   saveState();
   updateAllResults();
   fitEditableText(event.target);
+});
+
+modeButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    state.mode = button.dataset.mode === "individual" ? "individual" : "team";
+    saveState();
+    renderBoard();
+  });
 });
 
 document.addEventListener("click", (event) => {
