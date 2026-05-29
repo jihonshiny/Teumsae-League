@@ -4,26 +4,25 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>틈새리그 배드민턴 리그 대진표</title>
-    <link rel="stylesheet" href="./styles.css?v=20260528-title" />
+    <link rel="stylesheet" href="./styles.css?v=20260529-feedback" />
   </head>
   <body>
     <main class="app">
       <header class="topbar">
         <div class="title-wrap">
-          <input
+          <textarea
             id="titleInput"
             class="title-input"
             placeholder="대회 제목 입력"
             aria-label="대회 제목"
-          />
+            rows="1"
+          ></textarea>
         </div>
         <div class="actions">
           <label class="court-control">
             <span>코트 수</span>
             <input id="courtCountInput" type="number" min="2" max="30" value="6" />
           </label>
-          <button id="addMatchBtn" type="button">+ 경기</button>
-          <button id="removeMatchBtn" type="button">- 경기</button>
           <button id="clearScoresBtn" type="button">점수 비우기</button>
           <button id="printBtn" type="button">인쇄/PDF</button>
           <button id="resetBtn" type="button">초기화</button>
@@ -51,6 +50,10 @@
           />
         </div>
         <div id="matchList"></div>
+        <div class="board-actions">
+          <button id="addMatchBtn" type="button">+ 경기 추가</button>
+          <button id="removeMatchBtn" type="button">- 마지막 경기 삭제</button>
+        </div>
       </section>
 
     <section class="result-section" aria-label="경기 결과">
@@ -61,6 +64,7 @@
             <th>순위</th>
             <th>학교명</th>
             <th>결과</th>
+            <th>세트 점수</th>
           </tr>
           </thead>
           <tbody id="resultBody"></tbody>
@@ -104,11 +108,7 @@
     <template id="setTemplate">
       <div class="set-row">
         <div class="set-number"></div>
-        <input
-          class="players"
-          data-field="playersA"
-          placeholder="선수명, 선수명"
-        />
+        <div class="player-cell" data-side="A"></div>
         <div class="scores">
           <input
             class="score score-a"
@@ -126,14 +126,10 @@
             inputmode="numeric"
           />
         </div>
-        <input
-          class="players"
-          data-field="playersB"
-          placeholder="선수명, 선수명"
-        />
+        <div class="player-cell" data-side="B"></div>
       </div>
     </template>
 
-    <script src="./script.js?v=20260528-title"></script>
+    <script src="./script.js?v=20260529-feedback"></script>
   </body>
 </html>
