@@ -13,8 +13,7 @@ const matchTemplate = document.querySelector("#matchTemplate");
 const fixtureTemplate = document.querySelector("#fixtureTemplate");
 const setTemplate = document.querySelector("#setTemplate");
 
-const MIN_COURT_WIDTH = 520;
-const SIDE_COLUMN_WIDTH = 132;
+const COURT_GROUP_COUNT = 2;
 
 let state = loadState();
 
@@ -33,7 +32,7 @@ function loadState() {
     title: "",
     courtCount: 6,
     courts: getCourtLabels(6),
-    matches: [createMatch(0, false, 6)],
+    matches: [createMatch(0)],
   };
 }
 
@@ -46,7 +45,7 @@ function sanitizeState(nextState) {
   nextState.courtCount = normalizeCourtCount(nextState.courtCount ?? 6);
   nextState.courts = normalizeCourts(nextState.courts, nextState.courtCount);
   nextState.matches.forEach((match) => {
-    ensureFixtureCount(match, nextState.courtCount);
+    ensureFixtureCount(match);
     match.fixtures.forEach((fixture) => {
       fixture.sets.forEach((set) => {
         set.playersA = normalizePlayerText(set.playersA);
@@ -59,9 +58,9 @@ function sanitizeState(nextState) {
   return nextState;
 }
 
-function createMatch(index, withSampleScores = false, courtCount = state.courtCount) {
+function createMatch(index, withSampleScores = false) {
   return {
-    fixtures: Array.from({ length: courtCount }, () => createFixture(withSampleScores)),
+    fixtures: Array.from({ length: COURT_GROUP_COUNT }, () => createFixture(withSampleScores)),
   };
 }
 
@@ -92,7 +91,6 @@ function renderBoard() {
   state.matches.forEach((match, matchIndex) => {
     const row = matchTemplate.content.firstElementChild.cloneNode(true);
     row.dataset.match = matchIndex;
-    applyBoardColumns(row);
     row.querySelector(".match-title").textContent = `${matchIndex + 1}경기`;
 
     match.fixtures.forEach((fixture, fixtureIndex) => {
@@ -111,7 +109,6 @@ function renderBoard() {
 function renderCourtHeader() {
   const head = document.querySelector(".board-head");
   head.querySelectorAll(".court-name").forEach((input) => input.remove());
-  applyBoardColumns(head);
 
   state.courts.forEach((court, index) => {
     const input = document.createElement("input");
@@ -121,11 +118,6 @@ function renderCourtHeader() {
     input.ariaLabel = `${index + 1}번 코트 이름`;
     head.appendChild(input);
   });
-}
-
-function applyBoardColumns(element) {
-  element.style.gridTemplateColumns = `${SIDE_COLUMN_WIDTH}px repeat(${state.courtCount}, minmax(${MIN_COURT_WIDTH}px, 1fr))`;
-  element.style.minWidth = `${SIDE_COLUMN_WIDTH + state.courtCount * MIN_COURT_WIDTH}px`;
 }
 
 function renderFixture(fixture, matchIndex, fixtureIndex) {
@@ -186,7 +178,7 @@ function updateStateFromInput(input) {
 
   if (input.id === "courtCountInput") {
     state.courtCount = normalizeCourtCount(input.value);
-    state.courts = normalizeCourts(state.courts, state.courtCount);
+    state.courts = getCourtLabels(state.courtCount);
     ensureAllFixtureCounts();
     saveState();
     renderBoard();
@@ -296,24 +288,29 @@ function normalizeCourtCount(value) {
 }
 
 function getCourtLabels(totalCourts) {
-  return Array.from({ length: totalCourts }, (_, index) => `${index + 1} 코트`);
+  const firstEnd = Math.ceil(totalCourts / 2);
+  return [formatCourtRange(1, firstEnd), formatCourtRange(firstEnd + 1, totalCourts)];
+}
+
+function formatCourtRange(start, end) {
+  return start === end ? `${start} 코트` : `${start}~${end} 코트`;
 }
 
 function normalizeCourts(courts, courtCount) {
   const labels = getCourtLabels(courtCount);
   const previous = Array.isArray(courts) ? courts : [];
-  if (previous.some((court) => String(court ?? "").includes("~"))) return labels;
+  if (previous.length !== COURT_GROUP_COUNT) return labels;
   return labels.map((label, index) => cleanName(previous[index]) || label);
 }
 
 function ensureAllFixtureCounts() {
-  state.matches.forEach((match) => ensureFixtureCount(match, state.courtCount));
+  state.matches.forEach((match) => ensureFixtureCount(match));
 }
 
-function ensureFixtureCount(match, courtCount) {
+function ensureFixtureCount(match) {
   if (!Array.isArray(match.fixtures)) match.fixtures = [];
-  while (match.fixtures.length < courtCount) match.fixtures.push(createFixture());
-  if (match.fixtures.length > courtCount) match.fixtures = match.fixtures.slice(0, courtCount);
+  while (match.fixtures.length < COURT_GROUP_COUNT) match.fixtures.push(createFixture());
+  if (match.fixtures.length > COURT_GROUP_COUNT) match.fixtures = match.fixtures.slice(0, COURT_GROUP_COUNT);
 }
 
 function addStanding(map, school, result, setsFor, setsAgainst) {
