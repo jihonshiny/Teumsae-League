@@ -155,7 +155,8 @@ textarea {
 .league-board {
   display: grid;
   gap: 10px;
-  overflow: visible;
+  overflow-x: auto;
+  overflow-y: visible;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -214,7 +215,7 @@ textarea {
 .board-head,
 .match {
   display: grid;
-  grid-template-columns: 112px minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: 132px repeat(2, minmax(520px, 1fr));
   overflow: hidden;
   border: 1px solid rgba(160, 188, 224, 0.86);
   border-radius: 18px;
@@ -223,7 +224,6 @@ textarea {
 }
 
 .board-head {
-  grid-template-columns: 112px minmax(0, 1fr) minmax(0, 1fr);
   overflow: visible;
   border: 0;
   background: transparent;
@@ -247,11 +247,11 @@ textarea {
   border-radius: 18px;
 }
 
-.court-name[data-court="0"] {
+.court-name {
   border-radius: 18px;
 }
 
-.court-name[data-court="1"] {
+.court-name.alt-court {
   background: #137a39;
   border-radius: 18px;
 }
@@ -278,8 +278,9 @@ textarea {
   border-right: 1px solid rgba(181, 204, 232, 0.80);
   background: #f0f6ff;
   color: var(--navy);
-  font-size: clamp(28px, 3vw, 42px);
+  font-size: clamp(28px, 2.4vw, 36px);
   font-weight: 900;
+  white-space: nowrap;
 }
 
 .fixture {
