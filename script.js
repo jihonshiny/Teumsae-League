@@ -60,8 +60,8 @@ function sanitizeState(nextState) {
   nextState.matches.forEach((match) => {
     match.fixtures.forEach((fixture) => {
       fixture.sets.forEach((set) => {
-        set.playersA = normalizePlayers(set.playersA);
-        set.playersB = normalizePlayers(set.playersB);
+        set.playersA = normalizePlayerText(set.playersA);
+        set.playersB = normalizePlayerText(set.playersB);
         set.scoreA = normalizeScore(set.scoreA);
         set.scoreB = normalizeScore(set.scoreB);
       });
@@ -75,13 +75,17 @@ function createMatch(index, withSampleScores = false) {
     fixtures: pairCycle[index % pairCycle.length].map(([schoolA, schoolB]) => ({
       schoolA,
       schoolB,
-      sets: [0, 1, 2].map((setIndex) => ({
-        playersA: [""],
-        playersB: [""],
-        scoreA: withSampleScores ? [25, 21, 21][setIndex] : "",
-        scoreB: withSampleScores ? [21, 25, 25][setIndex] : "",
-      })),
+      sets: [0, 1, 2].map((setIndex) => createSet(withSampleScores, setIndex)),
     })),
+  };
+}
+
+function createSet(withSampleScores = false, setIndex = 0) {
+  return {
+    playersA: "",
+    playersB: "",
+    scoreA: withSampleScores ? [25, 21, 21][setIndex] ?? "" : "",
+    scoreB: withSampleScores ? [21, 25, 25][setIndex] ?? "" : "",
   };
 }
 
@@ -142,21 +146,18 @@ function renderPlayerCell(cell, players, field, matchIndex, fixtureIndex, setInd
   const list = document.createElement("div");
   list.className = "player-list";
 
-  normalizePlayers(players).forEach((player, playerIndex) => {
-    const input = document.createElement("input");
-    input.className = "players";
-    input.dataset.field = field;
-    input.dataset.playerIndex = playerIndex;
-    input.placeholder = `선수 ${playerIndex + 1}`;
-    input.value = player;
-    list.appendChild(input);
-  });
+  const input = document.createElement("input");
+  input.className = "players";
+  input.dataset.field = field;
+  input.placeholder = "선수명, 선수명";
+  input.value = normalizePlayerText(players);
+  list.appendChild(input);
 
   const controls = document.createElement("div");
   controls.className = "player-controls";
   controls.innerHTML = `
-    <button class="player-btn" type="button" data-action="add-player" data-match="${matchIndex}" data-fixture="${fixtureIndex}" data-set="${setIndex}" data-field="${field}" aria-label="선수 추가">+</button>
-    <button class="player-btn" type="button" data-action="remove-player" data-match="${matchIndex}" data-fixture="${fixtureIndex}" data-set="${setIndex}" data-field="${field}" aria-label="선수 삭제">-</button>
+    <button class="player-btn" type="button" data-action="add-set" data-match="${matchIndex}" data-fixture="${fixtureIndex}" data-set="${setIndex}" aria-label="출전 줄 추가">+</button>
+    <button class="player-btn" type="button" data-action="remove-set" data-match="${matchIndex}" data-fixture="${fixtureIndex}" data-set="${setIndex}" aria-label="출전 줄 삭제">-</button>
   `;
 
   cell.replaceChildren(list, controls);
@@ -197,9 +198,7 @@ function updateStateFromInput(input) {
 
   const setIndex = Number(input.closest(".set-row").dataset.set);
   if (field === "playersA" || field === "playersB") {
-    const playerIndex = Number(input.dataset.playerIndex ?? 0);
-    fixture.sets[setIndex][field] = normalizePlayers(fixture.sets[setIndex][field]);
-    fixture.sets[setIndex][field][playerIndex] = input.value;
+    fixture.sets[setIndex][field] = input.value;
     return;
   }
 
@@ -264,18 +263,15 @@ function normalizeScore(value) {
   return String(Math.max(0, score));
 }
 
-function normalizePlayers(value) {
+function normalizePlayerText(value) {
   if (Array.isArray(value)) {
-    const players = value.map((player) => String(player ?? ""));
-    return players.length ? players : [""];
+    return value
+      .map((player) => String(player ?? "").trim())
+      .filter(Boolean)
+      .join(", ");
   }
 
-  const text = String(value ?? "");
-  if (!text.trim()) return [""];
-  return text
-    .split(/[,\n]/)
-    .map((player) => player.trim())
-    .filter(Boolean);
+  return String(value ?? "");
 }
 
 function normalizeCourtCount(value) {
@@ -376,17 +372,20 @@ document.addEventListener("click", (event) => {
   const button = event.target.closest(".player-btn");
   if (!button) return;
 
-  const { match, fixture, set, field, action } = button.dataset;
-  const setState = state.matches[Number(match)].fixtures[Number(fixture)].sets[Number(set)];
-  setState[field] = normalizePlayers(setState[field]);
+  const { match, fixture, set, action } = button.dataset;
+  const fixtureState = state.matches[Number(match)].fixtures[Number(fixture)];
+  const setIndex = Number(set);
 
-  if (action === "add-player") {
-    setState[field].push("");
+  if (action === "add-set") {
+    fixtureState.sets.splice(setIndex + 1, 0, createSet());
   }
 
-  if (action === "remove-player") {
-    if (setState[field].length > 1) setState[field].pop();
-    else setState[field][0] = "";
+  if (action === "remove-set") {
+    if (fixtureState.sets.length > 1) {
+      fixtureState.sets.splice(setIndex, 1);
+    } else {
+      fixtureState.sets[0] = createSet();
+    }
   }
 
   saveState();
