@@ -139,6 +139,14 @@ function renderFixture(fixture, matchIndex, fixtureIndex) {
     setList.appendChild(setEl);
   });
 
+  const controls = document.createElement("div");
+  controls.className = "set-controls";
+  controls.innerHTML = `
+    <button class="set-btn" type="button" data-action="add-set" data-match="${matchIndex}" data-fixture="${fixtureIndex}">+ 출전 줄</button>
+    <button class="set-btn" type="button" data-action="remove-set" data-match="${matchIndex}" data-fixture="${fixtureIndex}">- 마지막 줄</button>
+  `;
+  fixtureEl.appendChild(controls);
+
   return fixtureEl;
 }
 
@@ -153,14 +161,7 @@ function renderPlayerCell(cell, players, field, matchIndex, fixtureIndex, setInd
   input.value = normalizePlayerText(players);
   list.appendChild(input);
 
-  const controls = document.createElement("div");
-  controls.className = "player-controls";
-  controls.innerHTML = `
-    <button class="player-btn" type="button" data-action="add-set" data-match="${matchIndex}" data-fixture="${fixtureIndex}" data-set="${setIndex}" aria-label="출전 줄 추가">+</button>
-    <button class="player-btn" type="button" data-action="remove-set" data-match="${matchIndex}" data-fixture="${fixtureIndex}" data-set="${setIndex}" aria-label="출전 줄 삭제">-</button>
-  `;
-
-  cell.replaceChildren(list, controls);
+  cell.replaceChildren(list);
 }
 
 function updateStateFromInput(input) {
@@ -369,20 +370,19 @@ document.addEventListener("input", (event) => {
 });
 
 document.addEventListener("click", (event) => {
-  const button = event.target.closest(".player-btn");
+  const button = event.target.closest(".set-btn");
   if (!button) return;
 
-  const { match, fixture, set, action } = button.dataset;
+  const { match, fixture, action } = button.dataset;
   const fixtureState = state.matches[Number(match)].fixtures[Number(fixture)];
-  const setIndex = Number(set);
 
   if (action === "add-set") {
-    fixtureState.sets.splice(setIndex + 1, 0, createSet());
+    fixtureState.sets.push(createSet());
   }
 
   if (action === "remove-set") {
     if (fixtureState.sets.length > 1) {
-      fixtureState.sets.splice(setIndex, 1);
+      fixtureState.sets.pop();
     } else {
       fixtureState.sets[0] = createSet();
     }
