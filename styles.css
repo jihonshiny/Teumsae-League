@@ -383,6 +383,10 @@ textarea {
   color: var(--red);
 }
 
+.fixture-2 .school-a {
+  color: var(--ink);
+}
+
 .match:nth-child(even) .fixture-1 .school-a,
 .match:nth-child(odd) .fixture-2 .school-b {
   color: var(--green);
